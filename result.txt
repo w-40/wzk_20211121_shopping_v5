@@ -1,0 +1,1772 @@
+package nuc.ss.shopping.component;
+/**
+ * @author：wzk
+ * @desc：电商购物平台-添加图书对话框
+ */
+
+import nuc.ss.shopping.db.BookDataSet;
+import nuc.ss.shopping.entity.Book;
+import nuc.ss.shopping.entity.Category;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.List;
+
+import static nuc.ss.shopping.frame.AddBookFrame.bookModel;
+
+public class AddBookDialog extends JDialog {
+
+    public AddBookDialog(Frame jf, String title, boolean modal) {
+        super(jf, title, modal);
+        this.setSize(665, 370);
+        this.setLocation(635, 330);
+
+
+        Box vBox = Box.createVerticalBox();
+
+        //组装图书编号
+        Box bidBox = Box.createHorizontalBox();
+        JLabel bidLabel = new JLabel("图书编号：");
+        JTextField bidField = new JTextField(15);
+
+        bidBox.add(bidLabel);
+        bidBox.add(Box.createHorizontalStrut(20));
+        bidBox.add(bidField);
+
+        //组装图书名称
+        Box nameBox = Box.createHorizontalBox();
+        JLabel nameLabel = new JLabel("图书名称：");
+        JTextField nameField = new JTextField(15);
+
+        nameBox.add(nameLabel);
+        nameBox.add(Box.createHorizontalStrut(20));
+        nameBox.add(nameField);
+
+        //组装图书作者
+        Box authorBox = Box.createHorizontalBox();
+        JLabel authorLabel = new JLabel("图书作者：");
+        JTextField authorField = new JTextField(15);
+
+        authorBox.add(authorLabel);
+        authorBox.add(Box.createHorizontalStrut(20));
+        authorBox.add(authorField);
+
+        //组装图书价格
+        Box priceBox = Box.createHorizontalBox();
+        JLabel priceLabel = new JLabel("图书价格：");
+        JTextField priceField = new JTextField(15);
+
+        priceBox.add(priceLabel);
+        priceBox.add(Box.createHorizontalStrut(20));
+        priceBox.add(priceField);
+
+        //组装图书库存
+        Box numBox = Box.createHorizontalBox();
+        JLabel numLabel = new JLabel("图书库存：");
+        JTextField numField = new JTextField(15);
+
+        numBox.add(numLabel);
+        numBox.add(Box.createHorizontalStrut(20));
+        numBox.add(numField);
+
+        //组装图书一级类目
+        Box firstCategoryBox = Box.createHorizontalBox();
+        JLabel firstCategoryLabel = new JLabel("图书一级类目：");
+        JComboBox<String> firstCategory = new JComboBox<String>();
+        firstCategory.addItem("工具类");
+        firstCategory.addItem("小说类");
+        firstCategory.setPreferredSize(new Dimension(210, 20));
+
+        firstCategoryBox.add(firstCategoryLabel);
+        firstCategoryBox.add(Box.createHorizontalStrut(20));
+        firstCategoryBox.add(firstCategory);
+
+        //组装图书二级类目
+        Box secondCategoryBox = Box.createHorizontalBox();
+        JLabel secondCategoryLabel = new JLabel("图书二级类目：");
+
+        JComboBox<String> secondCategory = new JComboBox<String>();
+
+        //工具类
+        secondCategory.addItem("数学类");
+        secondCategory.addItem("计算机类");
+        secondCategory.addItem("土木类");
+
+        //小说类
+        secondCategory.addItem("科幻类");
+        secondCategory.addItem("言情类");
+        secondCategory.addItem("名著类");
+
+        secondCategoryBox.add(secondCategoryLabel);
+        secondCategoryBox.add(Box.createHorizontalStrut(20));
+
+        secondCategoryBox.add(secondCategory);
+
+
+        //组装按钮
+        Box btnBox = Box.createHorizontalBox();
+        JButton addBtn = new JButton("添加");
+
+
+        btnBox.add(addBtn);
+        vBox.add(Box.createVerticalStrut(20));
+        vBox.add(bidBox);
+        vBox.add(Box.createVerticalStrut(15));
+        vBox.add(nameBox);
+        vBox.add(Box.createVerticalStrut(15));
+        vBox.add(authorBox);
+        vBox.add(Box.createVerticalStrut(15));
+        vBox.add(priceBox);
+        vBox.add(Box.createVerticalStrut(15));
+        vBox.add(numBox);
+        vBox.add(Box.createVerticalStrut(15));
+        vBox.add(firstCategoryBox);
+        vBox.add(Box.createVerticalStrut(15));
+        vBox.add(secondCategoryBox);
+        vBox.add(Box.createVerticalStrut(15));
+        vBox.add(btnBox);
+
+        //为了左右有间距，在vBox外层封装一个水平的Box，添加间隔
+        Box hBox = Box.createHorizontalBox();
+        hBox.add(Box.createHorizontalStrut(20));
+        hBox.add(vBox);
+        hBox.add(Box.createHorizontalStrut(20));
+
+        this.add(hBox);
+        addBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BookDataSet bds = new BookDataSet();
+
+                //获取用户录入
+                String bid = bidField.getText().trim();
+                Category category = new Category(bid, "", "");
+                String name = nameField.getText().trim();
+                String author = authorField.getText().trim();
+                float price = Float.parseFloat(priceField.getText());
+                int num = Integer.parseInt(numField.getText());
+                category.setFirstLevel(firstCategory.getSelectedItem().toString());
+                category.setSecondLevel(secondCategory.getSelectedItem().toString());
+                Book book = new Book(bid,name,author,price,num,category);
+
+                boolean flag = false;
+                try {
+                    flag = bds.addBook(book);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                List<Book> books = null;
+                books = bds.getBooks();
+                /*for (Book book1 : books) {
+                    System.out.println(book1);
+                }*/
+
+                Object[] colName = {"书籍编号", "书籍名称", "书籍作者","价格","库存", "书籍分类"};
+
+                Object[][] newB = new Object[books.size()][6];
+
+                for (int i = 0; i < books.size(); i++) {
+                    System.out.println(books.get(i));
+                }
+
+                for (int i = 0; i < books.size(); i++) {
+                    newB[i][0] = books.get(i).getId();
+                    newB[i][1] = books.get(i).getName();
+                    newB[i][2] = books.get(i).getAuthor();
+                    newB[i][3] = books.get(i).getPrice();
+                    newB[i][4] = books.get(i).getNum();
+                    newB[i][5] = books.get(i).getCategory();
+                }
+                bookModel.setDataVector(newB, colName);
+               // System.out.println("-------------------------------------------------");
+                if (flag == true){
+                    JOptionPane.showMessageDialog(jf,"添加成功");
+                    dispose();
+                }else {
+                    JOptionPane.showMessageDialog(jf,"添加失败");
+                }
+            }
+        });
+    }
+}
+package nuc.ss.shopping.component;
+/**
+ * @author：wzk
+ * @desc：电商购物平台-购物车添加商品对话框
+ */
+
+import nuc.ss.shopping.db.BookDataSet;
+import nuc.ss.shopping.entity.Book;
+import nuc.ss.shopping.entity.ShoppingCart;
+import nuc.ss.shopping.entity.StockException;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import static nuc.ss.shopping.frame.ShoppingCartFrame.cartModel;
+
+public class CartAddDialog extends JDialog {
+    ShoppingCart sc = new ShoppingCart();
+
+    public CartAddDialog(Frame jf, String title, boolean modal) {
+        super(jf, title, modal);
+        this.setSize(453, 161);
+        this.setLocation(635, 330);
+        Box vBox = Box.createVerticalBox();
+
+        //组装书名输入框
+        Box bookNameBox = Box.createHorizontalBox();
+        JLabel bookNameLabel = new JLabel("请输入你要添加的书名：     ");
+        JTextField bookNameField = new JTextField(15);
+        bookNameBox.add(bookNameLabel);
+        bookNameBox.add(Box.createHorizontalStrut(20));
+        bookNameBox.add(bookNameField);
+
+        //组装数量输入框
+        Box numBox = Box.createHorizontalBox();
+        JLabel numLabel = new JLabel("请输入你要添加的书的数量：");
+        JTextField numField = new JTextField(15);
+        numBox.add(numLabel);
+        numBox.add(Box.createHorizontalStrut(10));
+        numBox.add(numField);
+
+        //组装按钮
+        Box btnBox = Box.createHorizontalBox();
+        JButton addBtn = new JButton("确认添加");
+        btnBox.add(addBtn);
+
+        vBox.add(Box.createVerticalStrut(10));
+        vBox.add(bookNameBox);
+        vBox.add(Box.createVerticalStrut(10));
+        vBox.add(numBox);
+        vBox.add(Box.createVerticalStrut(10));
+        vBox.add(btnBox);
+
+        // 为了左右有间距，在vBox外层封装一个水平的Box，添加间隔
+        Box hBox = Box.createHorizontalBox();
+        hBox.add(Box.createHorizontalStrut(20));
+        hBox.add(vBox);
+        hBox.add(Box.createHorizontalStrut(20));
+
+        this.add(hBox);
+
+
+        addBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BookDataSet bds = new BookDataSet();
+                String name = bookNameField.getText().trim();
+
+                int cartAddNum = Integer.parseInt(numField.getText());
+                List<Book> books = null;
+                books = bds.getBooks();
+                Book book = null;
+                for (int index = 0; index < books.size(); index++) {
+                    if (name.equals(books.get(index).getName())) {
+                        book = books.get(index);
+                    }
+                }
+
+                boolean flag = false;
+                try {
+                    flag = sc.buy(book, cartAddNum);
+                } catch (StockException stockException) {
+                    JOptionPane.showMessageDialog(jf, stockException);
+                }
+                Object[] colName = {"书名", "数量", "总价"};
+                Map<Book, Integer> cartMap = sc.getCarts();
+
+                Object[][] c = new Object[cartMap.size()][3];
+                int i = 0;
+                for (Map.Entry<Book, Integer> entry : cartMap.entrySet()) {
+                    c[i][0] = entry.getKey().getName();
+                    c[i][1] = entry.getValue();
+                    c[i][2] = entry.getKey().getPrice() * entry.getValue();
+                    i++;
+                }
+                cartModel.setDataVector(c, colName);
+                if (flag == true) {
+                    JOptionPane.showMessageDialog(jf, "添加成功");
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(jf, "添加失败");
+                }
+            }
+        });
+    }
+}
+package nuc.ss.shopping.component;
+/**
+ * @author：wzk
+ * @desc：电商购物平台-购物车移除商品对话框
+ */
+
+import nuc.ss.shopping.db.BookDataSet;
+import nuc.ss.shopping.entity.Book;
+import nuc.ss.shopping.entity.ShoppingCart;
+import nuc.ss.shopping.entity.StockException;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import static nuc.ss.shopping.frame.ShoppingCartFrame.cartModel;
+
+
+public class CartRemoveDialog extends JDialog {
+
+    public CartRemoveDialog(Frame jf, String title, boolean modal) {
+        super(jf, title, modal);
+        this.setSize(453, 161);
+        this.setLocation(635, 330);
+        Box vBox = Box.createVerticalBox();
+
+        //组装书名输入框
+        Box bookNameBox = Box.createHorizontalBox();
+        JLabel bookNameLabel = new JLabel("请输入你要移除的书名：     ");
+        JTextField bookNameField = new JTextField(15);
+        bookNameBox.add(bookNameLabel);
+        bookNameBox.add(Box.createHorizontalStrut(20));
+        bookNameBox.add(bookNameField);
+
+        //组装数量输入框
+        Box numBox = Box.createHorizontalBox();
+        JLabel numLabel = new JLabel("请输入你要移除的书的数量：");
+        JTextField numField = new JTextField(15);
+        numBox.add(numLabel);
+        numBox.add(Box.createHorizontalStrut(10));
+        numBox.add(numField);
+
+        //组装按钮
+        Box btnBox = Box.createHorizontalBox();
+        JButton removeBtn = new JButton("确认移除");
+        btnBox.add(removeBtn);
+
+        vBox.add(Box.createVerticalStrut(10));
+        vBox.add(bookNameBox);
+        vBox.add(Box.createVerticalStrut(10));
+        vBox.add(numBox);
+        vBox.add(Box.createVerticalStrut(10));
+        vBox.add(btnBox);
+
+        // 为了左右有间距，在vBox外层封装一个水平的Box，添加间隔
+        Box hBox = Box.createHorizontalBox();
+        hBox.add(Box.createHorizontalStrut(20));
+        hBox.add(vBox);
+        hBox.add(Box.createHorizontalStrut(20));
+
+        this.add(hBox);
+
+        removeBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BookDataSet bds = new BookDataSet();
+                String name = bookNameField.getText().trim();
+                int removeNum = Integer.parseInt(numField.getText());
+                List<Book> books = null;
+                books = bds.getBooks();
+                Book book = null;
+                for (int index = 0; index < books.size(); index++) {
+                    if (name.equals(books.get(index).getName())){
+                        book = books.get(index);
+                    }
+                }
+                boolean flag = false;
+                ShoppingCart sc = null;
+                try {
+                    sc = new ShoppingCart();
+                    flag = sc.remove(book,removeNum);
+                } catch (StockException stockException) {
+                    JOptionPane.showMessageDialog(jf,stockException);
+                }
+                Object[] colName = {"书名", "数量", "总价"};
+                Map<Book, Integer> cartMap = sc.getCarts();
+
+                Object[][] c = new Object[cartMap.size()][3];
+                int i = 0;
+                for (Map.Entry<Book, Integer> entry : cartMap.entrySet()) {
+                    c[i][0] = entry.getKey().getName();
+                    c[i][1] = entry.getValue();
+                    c[i][2] = entry.getKey().getPrice() * entry.getValue();
+                    i++;
+                }
+                cartModel.setDataVector(c, colName);
+                if (flag == true) {
+                    JOptionPane.showMessageDialog(jf, "移除成功");
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(jf, "移除失败");
+                }
+            }
+        });
+
+    }
+}
+package nuc.ss.shopping.db;
+/**
+ * @author：wzk
+ * @desc：电商购物平台book管理类
+ */
+
+import nuc.ss.shopping.entity.Book;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class BookDataSet implements Serializable{
+    private static final long serialVersionUID = 1L;
+    public static List<Book> books = new ArrayList<Book>();
+    static {
+        books = new BookDataSet().getBooks();
+    }
+
+    public List<Book> getBooks() {
+        FileInputStream fis = null;
+        ObjectInputStream ois = null;
+        try {
+            fis = new FileInputStream(DatabaseConfig.BOOK_FILE_PATH);
+            ois = new ObjectInputStream(fis);
+            if (DatabaseConfig.BOOK_FILE_PATH.length() == 0) {
+                fis.close();
+                return books;
+            } else {
+                ArrayList<Book> books = (ArrayList<Book>) ois.readObject();
+                ois.close();
+                fis.close();
+                return books;
+            }
+        } catch (EOFException e) {
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public void setBooks(List<Book> books) {
+        this.books = books;
+    }
+
+    public boolean addBook(Book book) throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DatabaseConfig.BOOK_FILE_PATH));
+        books.add(book);
+        oos.writeObject(books);
+        oos.close();
+        return true;
+    }
+}
+package nuc.ss.shopping.db;
+
+public class DatabaseConfig {
+    public static final String USER_FILE_PATH = "src\\user.txt";
+    public static final String BOOK_FILE_PATH = "src\\book.txt";
+    public static final String CART_FILE_PATH = "src\\cart.txt";
+}
+package nuc.ss.shopping.db;
+/**
+ * @author：wzk
+ * @desc：电商购物平台user管理类
+ */
+
+import nuc.ss.shopping.entity.Book;
+import nuc.ss.shopping.entity.User;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class UserDataSet {
+    private static final long serialVersionUID = 1L;
+    //    public static Set<User> users = new HashSet<User>();
+//
+//    public Set<User> getUsers() {
+//        return users;
+//    }
+//
+//    public void setUsers(Set<User> users) {
+//        UserDataSet.users = users;
+//    }
+    //public static List<Book> books = new BookDataSet().getBooks();
+    public static List<User> users = new ArrayList<User>();
+    static {
+        users = new UserDataSet().getUsers();
+    }
+
+    public List<User> getUsers() {
+        FileInputStream fis = null;
+        ObjectInputStream ois = null;
+        try {
+            fis = new FileInputStream(DatabaseConfig.USER_FILE_PATH);
+            ois = new ObjectInputStream(fis);
+            if (DatabaseConfig.USER_FILE_PATH.length() == 0) {
+                fis.close();
+                return users;
+            } else {
+                ArrayList<User> users = (ArrayList<User>) ois.readObject();
+                ois.close();
+                fis.close();
+                return users;
+            }
+        } catch (EOFException e) {
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        UserDataSet.users = users;
+    }
+
+    public boolean addUser(User user) throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DatabaseConfig.USER_FILE_PATH));
+        users.add(user);
+        oos.writeObject(users);
+        oos.close();
+        return true;
+    }
+}
+package nuc.ss.shopping.entity;
+
+import java.io.Serializable;
+
+/**
+ * @author：wzk
+ * @desc：电商购物平台实体类：书籍
+ */
+public class Book implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String bid;
+    private String name;
+    private String author;
+    private float price;
+    private int num;
+    private Category category;
+
+    public Book() {
+    }
+
+    public Book(String name, int num) {
+        this.name = name;
+        this.num = num;
+    }
+
+    public Book(String id, String name, String author, float price, int num, Category category) {
+        this.bid = id;
+        this.name = name;
+        this.author = author;
+        this.price = price;
+        this.num = num;
+        this.category = category;
+    }
+
+    //Test
+//    public Book(String bid, String name, String author, float price, int num) {
+//        this.bid = bid;
+//        this.name = name;
+//        this.author = author;
+//        this.price = price;
+//        this.num = num;
+//    }
+
+    public String getId() {
+        return bid;
+    }
+
+    public void setId(String id) {
+        this.bid = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public float getPrice() {
+        return price;
+    }
+
+    public void setPrice(float price) {
+        this.price = price;
+    }
+
+    public int getNum() {
+        return num;
+    }
+
+    public void setNum(int num) {
+        this.num = num;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "bid=" + bid +
+                ", name='" + name + '\'' +
+                ", author='" + author + '\'' +
+                ", price=" + price +
+                ", num=" + num +
+                ", category=" + category +
+                '}';
+    }
+}
+package nuc.ss.shopping.entity;
+
+import java.io.Serializable;
+
+/**
+ * @author wzk
+ * @version 4.0
+ * @description 电商购物平台实体类：书籍类目
+ */
+public class Category implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String id;
+    private String firstLevel;        //一级类目
+    private String secondLevel;        //二级类目
+
+    public Category(String id, String firstLevel, String secondLevel) {
+        this.id = id;
+        this.firstLevel = firstLevel;
+        this.secondLevel = secondLevel;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getFirstLevel() {
+        return firstLevel;
+    }
+
+    public void setFirstLevel(String firstLevel) {
+        this.firstLevel = firstLevel;
+    }
+
+    public String getSecondLevel() {
+        return secondLevel;
+    }
+
+    public void setSecondLevel(String secondLevel) {
+        this.secondLevel = secondLevel;
+    }
+
+    @Override
+    public String toString() {
+        // 小说 > 玄幻小说
+        return firstLevel + ">" + secondLevel;
+    }
+}
+package nuc.ss.shopping.entity;
+/**
+ * @author：wzk
+ * @desc：电商购物平台实体类：购物车
+ */
+
+import nuc.ss.shopping.db.BookDataSet;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+public class ShoppingCart implements Serializable {
+    private static final long serialVersionUID = 1L;
+    public static Map<Book,Integer> carts = new HashMap<Book,Integer>();
+    private volatile boolean isUpdate = false;
+    private BookDataSet bds = new BookDataSet();
+    public boolean isUpdate() {
+        return isUpdate;
+    }
+
+    public Map<Book, Integer> getCarts() {
+        return carts;
+    }
+
+    public void setCarts(Map<Book, Integer> carts) {
+        ShoppingCart.carts = carts;
+    }
+
+    public void setUpdate(boolean isUpdate) {
+        this.isUpdate = isUpdate;
+    }
+
+    public boolean buy(Book book, Integer quantity) throws StockException {
+
+        Integer num = carts.get(book);
+
+        if (book.getNum() < quantity) {
+            throw new StockException("您买的" + book.getName() + "仅剩" + book.getNum() + ",库存不足！");
+        }
+
+        if (num != null) {
+            num += quantity;
+        } else {
+            num = quantity;
+        }
+
+        carts.put(book, num);
+
+        this.isUpdate = true;
+
+        book.setNum(book.getNum() - quantity);
+
+        return true;
+    }
+
+    public boolean remove(Book book,Integer removeNum) throws StockException {
+
+        Integer cartBookNum = carts.get(book);
+
+        if (cartBookNum == null) {
+            throw new StockException("您还没有购买" + book.getName());
+        }
+
+        if (cartBookNum < removeNum) {
+            throw new StockException("您购买的" + book.getName() + "不足" + removeNum + "本");
+        }
+
+        carts.remove(book);
+
+        this.isUpdate = true;
+        book.setNum(book.getNum() + cartBookNum);
+        return true;
+    }
+
+    public String toString() {
+
+        StringBuffer buffer = new StringBuffer("");
+
+        Set<Book> keys = carts.keySet();
+        Iterator<Book> iterator = keys.iterator();
+
+        while (iterator.hasNext()) {
+
+            Book book = iterator.next();
+            buffer.append("您" + "购买了" + book + carts.get(book) + "件\r\n");
+        }
+
+        return buffer.toString();
+    }
+
+    public boolean clear() {
+        carts.clear();
+        return true;
+    }
+}
+package nuc.ss.shopping.entity;
+/**
+ * @author：wzk
+ * @desc：电商购物平台异常类：库存不足
+ */
+public class StockException extends Exception{
+    public StockException(){
+        super();
+    }
+
+    public StockException(String message){
+        super(message);
+    }
+}
+package nuc.ss.shopping.entity;
+
+import java.io.Serializable;
+
+/**
+ * @author wzk
+ *
+ * @description 显示注册窗体，用户输入用户信息，
+ *  *              点击”注册“后到达显示用户信息的窗体
+ *  *              相当于MVC模式中的model，用来封装数据
+ */
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String id;// 账号
+    private String name;// 姓名
+    private String password;// 密码
+    private char sex;// 性别
+    private String city;// 城市
+    private String type;// 类别（管理员或普通用户）
+    private ShoppingCart shoppingCart = new ShoppingCart();
+
+    public User() {
+    }
+
+    public User(String id, String password) {
+        this.id = id;
+        this.password = password;
+    }
+
+    public User(String id, String name, String password, char sex, String city, String type) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+        this.sex = sex;
+        this.city = city;
+        this.type = type;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public char getSex() {
+        return sex;
+    }
+
+    public void setSex(char sex) {
+        this.sex = sex;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public ShoppingCart getShoppingCart() {
+        return shoppingCart;
+    }
+
+    public void setShoppingCart(ShoppingCart shoppingCart) {
+        this.shoppingCart = shoppingCart;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", password='" + password + '\'' +
+                ", sex=" + sex +
+                ", city='" + city + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
+}
+package nuc.ss.shopping.frame;
+/**
+ * @author：wzk
+ * @desc：电商购物平台-管理员添加图书页面
+ */
+import nuc.ss.shopping.component.AddBookDialog;
+import nuc.ss.shopping.db.BookDataSet;
+import nuc.ss.shopping.entity.Book;
+import nuc.ss.shopping.entity.User;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.List;
+
+public class AddBookFrame {
+    private JFrame jf = new JFrame("电商购物平台_添加图书页面(管理员)");
+    BookDataSet bds = new BookDataSet();
+    List<Book> books;
+
+    {
+        books = bds.getBooks();
+    }
+
+    private JPanel jp = new JPanel();
+    private JScrollPane bottomJS;
+    private Box bottomBox;
+    public static DefaultTableModel bookModel;
+    public void init(User u) {
+        jf.setLocation(620, 260);
+        jf.setSize(800, 650);
+        JLabel l_hello = new JLabel("你好," + u.getName(), JLabel.LEFT);
+        l_hello.setFont(new Font("你好,", Font.BOLD, 20));
+        JLabel l_from = new JLabel("来自于:" + u.getCity(), JLabel.RIGHT);
+        l_from.setFont(new Font("来自于:", Font.BOLD, 20));
+
+        Box topBox = Box.createHorizontalBox();
+        topBox.add(l_hello);
+        topBox.add(Box.createHorizontalStrut(360));
+        topBox.add(l_from);
+        topBox.add(Box.createHorizontalStrut(50));
+
+        //设置分割线
+        JSeparator sep = new JSeparator(SwingConstants.CENTER);
+        sep.setPreferredSize(new Dimension(1200, 10));
+
+        jp.add(Box.createVerticalStrut(40));
+
+        Box centerBox = Box.createHorizontalBox();
+        JLabel bookName = new JLabel("书籍名:");
+        bookName.setFont(new Font("书籍名:", Font.BOLD, 20));
+        JTextField bookField = new JTextField(15);
+        JLabel l_type = new JLabel("分类:");
+        l_type.setFont(new Font("分类", Font.BOLD, 20));
+        JComboBox<String> type = new JComboBox<String>();
+        type.addItem("工具类");
+        type.addItem("小说类");
+        type.setPreferredSize(new Dimension(210, 20));
+        JButton searchBtn = new JButton("查询");
+        JButton addBtn = new JButton("添加图书");
+
+        addBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //弹出一个对话框，让用户输入图书的信息
+                new AddBookDialog(jf, "添加图书", true).setVisible(true);
+
+            }
+        });
+        /*searchBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updataBookData();
+            }
+        });*/
+
+
+        centerBox.add(bookName);
+        centerBox.add(Box.createHorizontalStrut(20));
+        centerBox.add(bookField);
+        centerBox.add(Box.createHorizontalStrut(20));
+        centerBox.add(l_type);
+        centerBox.add(Box.createHorizontalStrut(20));
+        centerBox.add(type);
+        centerBox.add(Box.createHorizontalStrut(20));
+        centerBox.add(searchBtn);
+        centerBox.add(Box.createHorizontalStrut(20));
+        centerBox.add(addBtn);
+
+        bottomBox = Box.createHorizontalBox();
+        Object[][] b = new Object[books.size()][6];
+        for (int i = 0; i < books.size(); i++) {
+            b[i][0] = books.get(i).getId();
+            b[i][1] = books.get(i).getName();
+            b[i][2] = books.get(i).getAuthor();
+            b[i][3] = books.get(i).getPrice();
+            b[i][4] = books.get(i).getNum();
+            b[i][5] = books.get(i).getCategory();
+        }
+
+        Object[] colName = {"书籍编号", "书籍名称", "书籍作者","价格","库存", "书籍分类"};
+        bookModel = new DefaultTableModel(b, colName);
+        JTable bookTable = new JTable(bookModel);
+
+        JTableHeader bookTableHeader = bookTable.getTableHeader();
+        bookTableHeader.setFont(new Font("", Font.BOLD, 20));
+        bottomBox.add(bookTable);
+        bookTable.setPreferredSize(new Dimension(750, 200));
+        bookTable.setFont(new Font("", Font.LAYOUT_NO_LIMIT_CONTEXT, 18));
+        DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
+        tcr.setHorizontalAlignment(JLabel.CENTER);
+        bookTable.setDefaultRenderer(Object.class, tcr);
+
+        jp.add(topBox);
+        jp.add(sep);
+        jp.add(centerBox);
+        bottomJS = new JScrollPane(bookTable);
+        bottomJS.setPreferredSize(new Dimension(750, 650));
+        jp.add(bottomJS);
+        jf.add(jp);
+        jf.setVisible(true);
+    }
+    /*public void updataBookData() {
+        BookDataSet newbds = new BookDataSet();
+        Object[] colName = {"书籍编号", "书籍名称", "书籍作者","价格","库存", "书籍分类"};
+        List<Book> books = newbds.getBooks();
+        Object[][] newB = new Object[books.size()][6];
+
+        for (int i = 0; i < books.size(); i++) {
+            System.out.println(books.get(i));
+        }
+
+        for (int i = 0; i < books.size(); i++) {
+            newB[i][0] = books.get(i).getId();
+            newB[i][1] = books.get(i).getName();
+            newB[i][2] = books.get(i).getAuthor();
+            newB[i][3] = books.get(i).getPrice();
+            newB[i][4] = books.get(i).getNum();
+            newB[i][5] = books.get(i).getCategory();
+        }
+        bookModel.setDataVector(newB, colName);
+    }*/
+}
+package nuc.ss.shopping.frame;
+/**
+ * @author：wzk
+ * @desc：电商购物平台-普通用户登录之后显示商品查询界面
+ */
+
+import nuc.ss.shopping.db.BookDataSet;
+import nuc.ss.shopping.entity.Book;
+import nuc.ss.shopping.entity.User;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.List;
+
+import static nuc.ss.shopping.frame.AddBookFrame.bookModel;
+
+public class InquireFrame {
+    private JFrame jf = new JFrame("电商购物平台_商品查询页面(普通用户)");
+
+    public void init(User u) {
+        JPanel jp = new JPanel();
+        jf.setLocation(800, 300);
+        jf.setSize(800, 650);
+        JLabel l_hello = new JLabel("你好," + u.getName(), JLabel.LEFT);
+        l_hello.setFont(new Font("你好,", Font.BOLD, 20));
+        JLabel l_from = new JLabel("来自于:" + u.getCity(), JLabel.RIGHT);
+        l_from.setFont(new Font("来自于:", Font.BOLD, 20));
+
+        Box topBox = Box.createHorizontalBox();
+        topBox.add(l_hello);
+        topBox.add(Box.createHorizontalStrut(360));
+        topBox.add(l_from);
+        topBox.add(Box.createHorizontalStrut(50));
+
+        //设置分割线
+        JSeparator sep = new JSeparator(SwingConstants.CENTER);
+        sep.setPreferredSize(new Dimension(1200, 10));
+
+        jp.add(Box.createVerticalStrut(40));
+
+        Box centerBox = Box.createHorizontalBox();
+        JLabel bookName = new JLabel("书籍名:");
+        bookName.setFont(new Font("书籍名:", Font.BOLD, 20));
+        JTextField bookField = new JTextField(15);
+        JLabel l_type = new JLabel("分类:");
+        l_type.setFont(new Font("分类", Font.BOLD, 20));
+        JComboBox<String> type = new JComboBox<String>();
+        type.addItem("工具类");
+        type.addItem("小说类");
+        type.setPreferredSize(new Dimension(150, 20));
+        JButton searchBtn = new JButton("查询");
+
+        JButton cartBtn = new JButton("查看购物车");
+
+        cartBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ShoppingCartFrame().init(u);
+            }
+        });
+
+        centerBox.add(bookName);
+        centerBox.add(Box.createHorizontalStrut(20));
+        centerBox.add(bookField);
+        centerBox.add(Box.createHorizontalStrut(40));
+        centerBox.add(l_type);
+        centerBox.add(Box.createHorizontalStrut(20));
+        centerBox.add(type);
+        centerBox.add(Box.createHorizontalStrut(40));
+        centerBox.add(searchBtn);
+        centerBox.add(Box.createHorizontalStrut(40));
+        centerBox.add(cartBtn);
+        centerBox.add(Box.createHorizontalStrut(20));
+
+        Box bottomBox = Box.createHorizontalBox();
+
+        BookDataSet bds = new BookDataSet();
+
+        List<Book> books = null;
+        books = bds.getBooks();
+
+        Object[][] b = new Object[books.size()][6];
+        for (int i = 0; i < books.size(); i++) {
+            b[i][0] = books.get(i).getId();
+            b[i][1] = books.get(i).getName();
+            b[i][2] = books.get(i).getAuthor();
+            b[i][3] = books.get(i).getPrice();
+            b[i][4] = books.get(i).getNum();
+            b[i][5] = books.get(i).getCategory();
+        }
+
+        Object[] colName = {"书籍编号", "书籍名称", "书籍作者", "库存", "书籍分类"};
+        //bookModel.setDataVector(b, colName);
+        //JTable bookTable = new JTable(b, colName);
+        JTable bookTable = new JTable(bookModel);
+
+        JTableHeader bookTableHeader = bookTable.getTableHeader();
+        bookTableHeader.setFont(new Font("", Font.BOLD, 20));
+
+        bottomBox.add(bookTable);
+        bookTable.setPreferredSize(new Dimension(750, 200));
+        bookTable.setFont(new Font("", Font.LAYOUT_NO_LIMIT_CONTEXT, 18));
+
+        DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
+        tcr.setHorizontalAlignment(JLabel.CENTER);
+        bookTable.setDefaultRenderer(Object.class, tcr);
+
+        jp.add(topBox);
+        jp.add(sep);
+        jp.add(centerBox);
+        JScrollPane bottomJS = new JScrollPane(bookTable);
+        bottomJS.setPreferredSize(new Dimension(750, 650));
+        jp.add(bottomJS);
+        jf.add(jp);
+        jf.setVisible(true);
+    }
+}
+package nuc.ss.shopping.frame;
+/**
+ * @author：wzk
+ * @desc：电商购物平台-注册登录界面
+ */
+import nuc.ss.shopping.db.UserDataSet;
+import nuc.ss.shopping.entity.User;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+
+public class LoginRegFrame {
+    JFrame jf = new JFrame("王志凯的电商购物平台");
+
+    public void init() throws Exception {
+        //设置窗口相关的属性
+        //窗口居中
+        jf.setLocation(800, 300);
+        jf.setSize(500, 350);
+        //jf.setResizable(false);//设置窗口大小不可变
+
+        JPanel jp = new JPanel();
+
+        //组装登录相关的元素
+        Box vBox = Box.createVerticalBox();
+        //组装用户名
+        Box uBox = Box.createHorizontalBox();
+        JLabel uLabel = new JLabel("  用户名:");
+        JTextField uField = new JTextField(15);
+
+        uBox.add(uLabel);
+        uBox.add(Box.createHorizontalStrut(20));
+        uBox.add(uField);
+
+        // 组装用户类型
+        Box tBox = Box.createVerticalBox();
+        JLabel tLabel = new JLabel("用户类型:");
+        JComboBox<String> userType = new JComboBox<String>();
+        userType.addItem("管理员");
+        userType.addItem("普通用户");
+        JPanel checkPanel = new JPanel();
+        checkPanel.add(tLabel);
+        checkPanel.add(Box.createHorizontalStrut(150));
+        checkPanel.add(userType);
+        checkPanel.setPreferredSize(new Dimension(200, 30));
+
+        tBox.add(Box.createHorizontalStrut(20));
+        tBox.add(checkPanel);
+
+
+        //组装密码
+        Box pBox = Box.createHorizontalBox();
+        JLabel pLabel = new JLabel("  密 码：");
+        JPasswordField pField = new JPasswordField(15);
+
+        pBox.add(pLabel);
+        pBox.add(Box.createHorizontalStrut(20));
+        pBox.add(pField);
+
+
+        //组装按钮
+        Box btnBox = Box.createHorizontalBox();
+        JButton loginBtn = new JButton("登录");
+        loginBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                /*BookDataSet bds = new BookDataSet();
+                List<Book> books = bds.getBooks();*/
+                UserDataSet uds = new UserDataSet();
+                List<User> users = uds.getUsers();
+                //Set<User> users = uds.getUsers();
+                if (users.isEmpty()) {
+                    JOptionPane.showMessageDialog(jf, "请先注册");
+                } else {
+                    for (int i = 0; i < users.size(); i++) {
+                        if (uField.getText().equals(users.get(i).getId())) {
+                            if (pField.getText().equals(users.get(i).getPassword())) {
+                                if (userType.getSelectedItem().equals("管理员")) {
+                                    JOptionPane.showMessageDialog(jf, "登录成功");
+                                    new MainManagementInterface().init(users.get(i));
+                                } else {
+                                    JOptionPane.showMessageDialog(jf, "登录成功");
+                                    new InquireFrame().init(users.get(i));
+                                }
+                            } else {
+                                JOptionPane.showMessageDialog(jf, "账号或密码错误");
+                            }
+                        }
+                    }
+                }
+
+            }
+        });
+
+        JButton resetBtn = new JButton("重置");
+        resetBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                uField.setText("");
+                pField.setText("");
+            }
+        });
+
+        JButton registBtn = new JButton("点我注册");
+        registBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new RegisterFrame();
+            }
+        });
+
+
+        btnBox.add(loginBtn);
+        btnBox.add(Box.createHorizontalStrut(50));
+        btnBox.add(resetBtn);
+        btnBox.add(Box.createHorizontalStrut(50));
+        btnBox.add(registBtn);
+
+        vBox.add(Box.createVerticalStrut(50));
+        vBox.add(uBox);
+        vBox.add(Box.createVerticalStrut(20));
+        vBox.add(tBox);
+        vBox.add(Box.createVerticalStrut(20));
+        vBox.add(pBox);
+        vBox.add(Box.createVerticalStrut(40));
+        vBox.add(btnBox);
+
+        jp.add(vBox);
+        jf.add(jp);
+        jf.setVisible(true);
+    }
+}
+package nuc.ss.shopping.frame;
+/**
+ * @author：wzk
+ * @desc：电商购物平台-主管理页面
+ */
+import nuc.ss.shopping.entity.User;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class MainManagementInterface {
+    JFrame jf = new JFrame("主管理界面");
+    public void init(User u) {
+        JPanel jp = new JPanel();
+        jf.setLocation(720, 280);
+        jf.setSize(800, 650);
+        JLabel l_hello = new JLabel("你好," + u.getName() + ",你是尊贵的管理员", JLabel.LEFT);
+        l_hello.setFont(new Font("", Font.BOLD, 20));
+        JLabel l_from = new JLabel("来自于:" + u.getCity(), JLabel.RIGHT);
+        l_from.setFont(new Font("", Font.BOLD, 20));
+
+        Box vBox = Box.createVerticalBox();
+
+        Box topBox = Box.createHorizontalBox();
+        topBox.add(l_hello);
+        topBox.add(Box.createHorizontalStrut(360));
+        topBox.add(l_from);
+        topBox.add(Box.createHorizontalStrut(50));
+        //设置分割线
+        JSeparator sep = new JSeparator(SwingConstants.CENTER);
+        sep.setPreferredSize(new Dimension(1200, 10));
+
+        jp.add(Box.createVerticalStrut(40));
+
+        Box addBookBtnBox = Box.createHorizontalBox();
+        Box userManageBtnBox = Box.createHorizontalBox();
+        Box backBtnBox = Box.createHorizontalBox();
+
+        JButton addBookBtn = new JButton("图书管理");
+        addBookBtn.setFont(new Font("宋体",Font.BOLD,35));
+        addBookBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new AddBookFrame().init(u);
+            }
+        });
+
+        JButton userManageBtn = new JButton("用户管理");
+        userManageBtn.setFont(new Font("宋体",Font.BOLD,35));
+        userManageBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new UserInfoFrame().init();
+            }
+        });
+
+        JButton backBtn = new JButton("返回");
+        backBtn.setFont(new Font("宋体",Font.BOLD,35));
+        backBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jf.dispose();
+            }
+        });
+
+        addBookBtnBox.add(addBookBtn);
+        userManageBtnBox.add(userManageBtn);
+        backBtnBox.add(backBtn);
+
+        vBox.add(topBox);
+        vBox.add(sep);
+        vBox.add(Box.createVerticalStrut(70));
+        vBox.add(addBookBtnBox);
+        vBox.add(Box.createVerticalStrut(70));
+        vBox.add(userManageBtnBox);
+        vBox.add(Box.createVerticalStrut(70));
+        vBox.add(backBtnBox);
+
+        jp.add(vBox);
+
+        jf.add(jp);
+        jf.setVisible(true);
+    }
+}
+package nuc.ss.shopping.frame;
+
+import nuc.ss.shopping.db.UserDataSet;
+import nuc.ss.shopping.entity.User;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+
+/**
+ * @author wzk
+ * @description 显示注册窗体，用户输入用户信息，
+ *              点击”注册“后到达显示用户信息的窗体
+ *              相当于MVC模式中的view
+ */
+public class RegisterFrame extends JFrame {
+    UserDataSet uds = new UserDataSet();
+
+    // 窗体上的组件
+    private JLabel l_id, l_name, l_password1, l_password2, l_sex, l_city;
+    private JTextField t_id, t_name;
+    private JPasswordField p_password1, p_password2;
+    private JRadioButton r_male, r_female;
+    private JComboBox<String> c_city;
+    private JButton b_reg, b_reset;
+
+    public RegisterFrame() {
+        //窗体的初始化
+        this.setTitle("电商购物平台_注册页面");
+        this.setSize(300, 450);
+        this.setLocation(800, 300);
+
+        init();
+
+        this.setVisible(true);
+    }
+
+    public void init() {
+        this.setLayout(new GridLayout(7, 2, 5, 5));
+
+        l_id = new JLabel("账号", JLabel.CENTER);
+        l_name = new JLabel("姓名", JLabel.CENTER);
+        l_password1 = new JLabel("密码", JLabel.CENTER);
+        l_password2 = new JLabel("确认密码", JLabel.CENTER);
+        l_sex = new JLabel("性别", JLabel.CENTER);
+        l_city = new JLabel("城市", JLabel.CENTER);
+
+        t_id = new JTextField();
+        t_name = new JTextField();
+
+        p_password1 = new JPasswordField();
+        p_password2 = new JPasswordField();
+
+        ButtonGroup bg = new ButtonGroup();
+        r_male = new JRadioButton("男");
+        r_female = new JRadioButton("女");
+        bg.add(r_male);
+        bg.add(r_female);
+        // 将两个单选按钮放到一个中间容器上
+        JPanel p = new JPanel();
+        p.add(r_male);
+        p.add(r_female);
+
+        c_city = new JComboBox<String>();
+        c_city.addItem("山西");
+        c_city.addItem("北京");
+        c_city.addItem("上海");
+        c_city.addItem("天津");
+        c_city.addItem("重庆");
+
+        b_reg = new JButton("注册");//事件源，一旦出现点击事件，收集用户信息，并显示到UserInfoFrame窗体上
+        //在事件源上添加事件监听器，匿名内部类对象相当于MAC模式中的控制层
+        b_reg.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // 从窗体收集用户信息
+                String id = t_id.getText();
+                String name = t_name.getText();
+                String password1 = new String(p_password1.getPassword());
+                String password2 = new String(p_password2.getPassword());
+                // 两次密码不一致的处理
+                if (!password1.equals(password2)) {
+                    showMessage();
+                    p_password1.setText("");
+                    p_password2.setText("");
+                    return;
+                } else {
+
+                }
+                char sex = ' ';
+                if (r_male.isSelected()) {
+                    sex = '男';
+                } else {
+                    sex = '女';
+                }
+                String city = (String) c_city.getSelectedItem();
+
+                // 用模型类封装收集到的信息
+                User u = new User(id,name,password1,sex,city,"");
+                try {
+                    uds.addUser(u);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                JOptionPane.showMessageDialog(p_password1,"注册成功,请登录");
+                dispose();
+                // 在用户信息窗体上展示注册的用户信息
+                //new UserInfoFrame();
+            }
+        });
+
+        b_reset = new JButton("重置");
+
+        this.add(l_id);
+        this.add(t_id);
+
+        this.add(l_name);
+        this.add(t_name);
+
+        this.add(l_password1);
+        this.add(p_password1);
+
+        this.add(l_password2);
+        this.add(p_password2);
+
+        this.add(l_sex);
+        this.add(p);
+
+        this.add(l_city);
+        this.add(c_city);
+
+        this.add(b_reg);
+        this.add(b_reset);
+    }
+    public void showMessage() {
+        JOptionPane.showMessageDialog(this,"两次密码应该相等",
+                "提示框",JOptionPane.WARNING_MESSAGE);
+    }
+}
+package nuc.ss.shopping.frame;
+/**
+ * @author:wzk
+ * @desc 电商购物平台，购物cn主界面
+ */
+
+import nuc.ss.shopping.component.CartAddDialog;
+import nuc.ss.shopping.component.CartRemoveDialog;
+import nuc.ss.shopping.entity.Book;
+import nuc.ss.shopping.entity.ShoppingCart;
+import nuc.ss.shopping.entity.User;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Map;
+
+
+public class ShoppingCartFrame {
+    private JTable shoppingCartTable;
+    public static DefaultTableModel cartModel;
+    JFrame jf = new JFrame("电商购物平台_购物车详情");
+
+    //@Test
+    public void init(User u) {
+        ShoppingCart sc = u.getShoppingCart();
+        JPanel jp = new JPanel();
+        jf.setSize(600, 550);
+        jf.setLocation(700, 340);
+
+        Box topBtnBox = Box.createHorizontalBox();
+        JButton addBtn = new JButton("添加");
+        addBtn.setFont(new Font("宋体", Font.BOLD, 20));
+
+        JButton deleteBtn = new JButton("移除");
+        deleteBtn.setFont(new Font("宋体", Font.BOLD, 20));
+        JButton clearBtn = new JButton("清空");
+        clearBtn.setFont(new Font("宋体", Font.BOLD, 20));
+        topBtnBox.add(addBtn);
+        topBtnBox.add(Box.createHorizontalStrut(40));
+        topBtnBox.add(deleteBtn);
+        topBtnBox.add(Box.createHorizontalStrut(40));
+        topBtnBox.add(clearBtn);
+
+        addBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new CartAddDialog(jf, "购物车添加图书", true).setVisible(true);
+            }
+        });
+
+        deleteBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new CartRemoveDialog(jf, "购物车移除图书", true).setVisible(true);
+            }
+        });
+
+        clearBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ShoppingCart sc = new ShoppingCart();
+                sc.clear();
+                Object[] colName = {"书名", "数量", "总价"};
+                Map<Book, Integer> cartMap = sc.getCarts();
+
+                Object[][] c = new Object[cartMap.size()][3];
+                int i = 0;
+                for (Map.Entry<Book, Integer> entry : cartMap.entrySet()) {
+                    c[i][0] = entry.getKey().getName();
+                    c[i][1] = entry.getValue();
+                    c[i][2] = entry.getKey().getPrice() * entry.getValue();
+                    i++;
+                }
+                cartModel.setDataVector(c, colName);
+                JOptionPane.showMessageDialog(jf,"清空购物车成功！");
+            }
+        });
+
+
+        //设置分割线
+        JSeparator sep = new JSeparator(SwingConstants.CENTER);
+        sep.setPreferredSize(new Dimension(1200, 10));
+
+        jp.add(Box.createVerticalStrut(40));
+
+        Map<Book, Integer> cartMap = sc.getCarts();
+        Object[][] c = new Object[cartMap.size()][3];
+        int i = 0;
+        for (Map.Entry<Book, Integer> entry : cartMap.entrySet()) {
+            c[i][0] = entry.getKey().getName();
+            c[i][1] = entry.getValue();
+            c[i][2] = entry.getKey().getPrice() * entry.getValue();
+            i++;
+        }
+        Object[] colName = {"书名", "数量", "总价"};
+        cartModel = new DefaultTableModel(c, colName);
+        //cartModel.setDataVector(c, colName);
+        //cartModel = new DefaultTableModel(c, colName);
+        shoppingCartTable = new JTable(cartModel);
+        JTableHeader cartTableHeader = shoppingCartTable.getTableHeader();
+        cartTableHeader.setFont(new Font("", Font.BOLD, 20));
+        shoppingCartTable.setPreferredSize(new Dimension(750, 200));
+        shoppingCartTable.setFont(new Font("", Font.LAYOUT_NO_LIMIT_CONTEXT, 18));
+        DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
+        tcr.setHorizontalAlignment(JLabel.CENTER);
+        shoppingCartTable.setDefaultRenderer(Object.class, tcr);
+
+        jp.add(topBtnBox);
+        JScrollPane js = new JScrollPane(shoppingCartTable);
+        jp.add(sep);
+        jp.add(js);
+        jf.add(jp);
+
+        jf.setVisible(true);
+
+    }
+}
+package nuc.ss.shopping.frame;
+/**
+ * @author：wzk
+ * @desc：电商购物平台-用户信息查询页面
+ */
+
+import nuc.ss.shopping.db.UserDataSet;
+import nuc.ss.shopping.entity.User;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
+
+public class UserInfoFrame extends JFrame {
+    private JTable t_user;
+    public static DefaultTableModel userModel;
+
+
+    public UserInfoFrame() {
+        // 窗体初始化
+        this.setTitle("电商购物平台_用户信息(管理员)");
+        this.setSize(400,350);
+        this.setLocation(800,400);
+        init();
+        this.setVisible(true);
+    }
+
+    public void init() {
+        UserDataSet uds = new UserDataSet();
+        List<User> users = uds.getUsers();
+        Object[][] u = new Object[users.size()][6];
+        for (int i = 0; i < users.size(); i++) {
+            u[i][0] = users.get(i).getId();
+            u[i][1] = users.get(i).getName();
+            u[i][2] = users.get(i).getPassword();
+            u[i][3] = users.get(i).getSex();
+            u[i][4] = users.get(i).getCity();
+            u[i][5] = users.get(i).getType();
+        }
+        Object[] colName = {"账号","姓名","密码","性别", "城市", "用户类型"};
+        userModel = new DefaultTableModel(u, colName);
+        JTable userTable = new JTable(userModel);
+        this.add(new JScrollPane(userTable));
+    }
+}
+package nuc.ss.shopping;
+
+import nuc.ss.shopping.frame.AddBookFrame;
+
+public class TestAddBookFrame {
+    public static void main(String[] args) {
+        //管理员登入
+
+        //new AddBookFrame().init();
+    }
+}
+package nuc.ss.shopping;
+
+public class TestInquireFrame {
+    public static void main(String[] args) {
+        //普通用户登入
+        //new InquireFrame().init();
+    }
+}
+package nuc.ss.shopping;
+
+import nuc.ss.shopping.frame.LoginRegFrame;
+
+public class TestLogin {
+	public static void main(String[] args) throws Exception {
+		new LoginRegFrame().init();
+	}
+}
+package nuc.ss.shopping;
+
+public class TestMainInterface {
+
+}
+package nuc.ss.shopping;
+
+public class TestMainManagementInterface {
+    public static void main(String[] args) {
+        //new MainManagementInterface().init();
+    }
+}
+package nuc.ss.shopping;
+
+import nuc.ss.shopping.frame.RegisterFrame;
+
+public class TestRegisterFrame {
+    public static void main(String[] args) {
+        new RegisterFrame();
+    }
+}
+package nuc.ss.shopping;
+
+import nuc.ss.shopping.frame.ShoppingCartFrame;
+
+public class TestShoppingCart {
+    public static void main(String[] args) {
+        //new ShoppingCartFrame().init();
+    }
+}
