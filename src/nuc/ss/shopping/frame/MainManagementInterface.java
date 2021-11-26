@@ -81,6 +81,7 @@ public class MainManagementInterface {
         jp.add(vBox);
 
         jf.add(jp);
+        jf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
     }
 }

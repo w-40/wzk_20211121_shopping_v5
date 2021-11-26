@@ -117,6 +117,7 @@ public class InquireFrame {
         bottomJS.setPreferredSize(new Dimension(750, 650));
         jp.add(bottomJS);
         jf.add(jp);
+        jf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
     }
 }

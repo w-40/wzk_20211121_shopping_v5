@@ -115,7 +115,7 @@ public class ShoppingCartFrame {
         jp.add(sep);
         jp.add(js);
         jf.add(jp);
-
+        jf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         jf.setVisible(true);
 
     }

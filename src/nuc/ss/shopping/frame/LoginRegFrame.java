@@ -130,6 +130,8 @@ public class LoginRegFrame {
         vBox.add(btnBox);
 
         jp.add(vBox);
+        //jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         jf.add(jp);
         jf.setVisible(true);
     }

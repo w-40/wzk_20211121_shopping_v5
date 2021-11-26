@@ -23,6 +23,7 @@ public class UserInfoFrame extends JFrame {
         this.setLocation(800,400);
         init();
         this.setVisible(true);
+        this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     }
 
     public void init() {
